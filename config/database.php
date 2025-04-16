@@ -62,6 +62,20 @@ return [
             ]) : [],
         ],
 
+        'admin_db' => [
+            'driver' => 'mysql',
+            'host' => env('DB_ADMIN_HOST', '127.0.0.1'),
+            'port' => env('DB_ADMIN_PORT', '3306'),
+            'database' => env('DB_ADMIN_DATABASE', 'admin_db'),
+            'username' => env('DB_ADMIN_USERNAME', 'root'),
+            'password' => env('DB_ADMIN_PASSWORD', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => true,
+            'engine' => null,
+        ],
+
         'mariadb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),
