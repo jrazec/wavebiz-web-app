@@ -1,13 +1,20 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
-import tailwindcss from '@tailwindcss/vite';
+
+// Patch globalThis.crypto for node
+if (!globalThis.crypto) {
+    const { webcrypto } = await import('node:crypto');
+    globalThis.crypto = webcrypto;
+}
 
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js'],
+            input: [
+                'resources/sass/app.scss',
+                'resources/js/app.js',
+            ],
             refresh: true,
         }),
-        tailwindcss(),
     ],
 });

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable
+class User extends Authenticatable // THIS SERVES AS THE MEMBERs
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
@@ -17,11 +17,44 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+
+     protected $table = 'members';
+     public $timestamps = false; 
+     protected $primaryKey = 'fldID';
+
+     protected $fillable = [
+        'fldUserID',
+        'fldUserName',
+        'fldFirstName',
+        'fldMiddleName',
+        'fldLastName',
+        'fldNickName',
+        'fldPassword',
+        'fldBirthDate',
+        'fldCivilStatus',
+        'fldGender',
+        'fldNationality',
+        'fldOrderLimitPerMonth',
+        'fldAgreeTerms',
+        'fldTermsAndCondition',
+        'fldUpdateNeeded',
+        'fldDateCreated',
+        'fldCreatedBy',
+        'fldDateModified',
+        'fldModifiedBy',
+        'fldIsDeleted',
+        'fldDateDeleted',
+        'fldDeletedBy',
+        'fldEmailAdd',
+        'fldCellphone',
+        'fldLandline',
+        'fldBeneficiary',
+        'fldRelationship',
+        'fldTIN',
+        'fldPackageID',
+        'fldSponsorID',
+        'fldDirectSponsorID',
+     ];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -29,7 +62,7 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $hidden = [
-        'password',
+        'fldPassword',
         'remember_token',
     ];
 
@@ -41,8 +74,18 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'fldPassword' => 'hashed',
         ];
     }
+
+    public function getAuthPassword()
+    {
+        return $this->fldPassword;
+    }
+    public function getEmailForPasswordReset()
+    {
+        return $this->fldEmailAdd;
+    }
+    
+
 }
