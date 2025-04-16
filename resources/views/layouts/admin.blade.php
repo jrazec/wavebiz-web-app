@@ -12,8 +12,9 @@
             min-height: 100vh;
         }
         .sidebar {
-            width: 250px;
-            background-color: #343a40;
+            min-width: 250px;
+            height: 100vh;
+            background: rgb(16, 12, 4);
             color: white;
         }
         .sidebar a {
@@ -21,32 +22,70 @@
             text-decoration: none;
             display: block;
             padding: 10px 20px;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
         .sidebar a:hover {
-            background-color: #495057;
+            background-color: #ffe15db7;
+            color: black;
+        }
+
+        .menu {
+            border-radius: 0.25rem;
         }
         .submenu {
             padding-left: 30px;
             font-size: 0.95rem;
+            border-radius: 0.25rem;
         }
         .content {
             flex-grow: 1;
             padding: 20px;
             background-color: #f8f9fa;
+            height: 100vh;
         }
+        .active-menu {
+            background-color: #ffe15d;
+            color: black !important;
+            font-weight: bold;
+            padding-left: 0.5rem;
+            border-radius: 0.25rem;
+        }
+
+     
     </style>
     @yield('styles')
 </head>
 <body>
     <!-- Sidebar -->
 
-    <div class="sidebar d-flex flex-column p-3">
-        <h4 class="text-center py-3">Admin Panel</h4>
-        <a href="{{ url('/admin/user') }}">Members</a>
-        <a href="{{ url('/admin/products') }}">Products</a>
-        <a href="{{ url('/admin/delivery') }}">Deliveries</a>
-        <a href="{{ url('/admin/logs') }}">Audit Log</a>
-        <a href="{{ url('/admin/settings') }}">Profile</a>
+    <div class="sidebar d-flex flex-column justify-content-between p-3">
+        <img src="{{ asset('assets/wavebiz_logo.png') }}" alt="Wavebiz Logo" class="mt-4 mb-4" style="width: 12rem;">
+        <div class="flex-grow-1">
+            <a href="{{ url('/admin/dashboard') }}" class="menu {{ Request::is('dashboard') ? 'active-menu' : '' }}">Home</a>
+        
+            <a href="{{ url('/admin/products') }}" class="menu {{ Request::is('products') ? 'active-menu' : '' }}">Products</a>
+            <div class="submenu">
+                <a href="#">Categories</a>
+                <div class="submenu">
+                    <a href="#">Sub-Categories</a>
+                </div>
+            </div>
+        
+            <a href="{{ url('/admin/delivery') }}" class="menu {{ Request::is('deliveries') ? 'active-menu' : '' }}">Deliveries</a>
+        
+            <a href="{{ url('/admin/user') }}" class="menu {{ Request::is('members') ? 'active-menu' : '' }}">Members</a>
+        
+            <a href="{{ url('/admin/logs') }}" class="menu {{ Request::is('auditlog') ? 'active-menu' : '' }}">Audit Log</a>
+        
+            <a href="{{ url('/admin/settings') }}"class="menu {{ Request::is('profile') ? 'active-menu' : '' }}">Profile</a>
+
+        </div>
+        <div class="d-flex justify-content-center">
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="btn btn-outline-light mt-auto">Logout</button>
+            </form>
+        </div>
     </div>
 
     <!-- Content -->

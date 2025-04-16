@@ -2,13 +2,23 @@
 
 @section('title', 'Dashboard')
 @section('page-title', 'Welcome, Admin')
+
+{{-- dashboard style --}}
 @section('styles')
 <style>
-  .grid {
-    max-height: 70vh;
+  .container {
+    max-height: 85vh;
     overflow-y: auto;
   }
+
+  canvas {
+    width: 100% !important;
+    height: auto !important;
+  }
 </style>
+@endsection
+
+{{-- dashboard scripts --}}
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
@@ -39,7 +49,7 @@
             }
         }
     }
-});
+  });
 
 const membersCtx = document.getElementById('membersChart').getContext('2d');
 const membersChart = new Chart(membersCtx, {
@@ -57,6 +67,7 @@ const membersChart = new Chart(membersCtx, {
     },
     options: {
         responsive: true,
+        maintainAspectRatio: false,
         scales: {
             y: {
                 beginAtZero: true
@@ -89,6 +100,7 @@ const deliveryCtx = document.getElementById('deliveryChart').getContext('2d');
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: {
                 legend: {
                     position: 'right',
@@ -98,22 +110,34 @@ const deliveryCtx = document.getElementById('deliveryChart').getContext('2d');
     });
 });
 </script>
+@endsection
+
+{{-- dashboard content --}}
 @section('content')
-<h1 class="text-2xl font-bold mb-4">Dashboard</h1>
-<div id="landing-page" class="mb-4">
-    <h2 class="text-xl font-bold mb-4">Business Analytics</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="bg-white p-4 rounded shadow">
-            <h3 class="font-bold mb-2">Weekly Sales</h3>
-            <canvas id="salesChart" width="400" height="200"></canvas>
-        </div>
-        <div class="bg-white p-4 rounded shadow">
-            <h3 class="font-bold mb-2">Member Growth</h3>
-            <canvas id="membersChart" width="400" height="200"></canvas>
-        </div>
-        <div class="bg-white p-4 rounded shadow">
-            <h3 class="font-bold mb-2">Delivery Status</h3>
-            <canvas id="deliveryChart" width="400" height="200"></canvas>
+<h2 class="text-2xl font-bold mb-4">Dashboard</h2>
+<div id="landing-page">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-12">
+                <div class="bg-white p-4 rounded shadow">
+                    <h3 class="font-bold mb-2">Weekly Sales</h3>
+                    <canvas id="salesChart" style="max-height: 300px;"></canvas>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="bg-white p-4 rounded shadow">
+                    <h3 class="font-bold mb-2">Member Growth</h3>
+                    <canvas id="membersChart" style="max-height: 16rem;"></canvas>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="bg-white p-4 rounded shadow">
+                    <h3 class="font-bold mb-2">Delivery Status</h3>
+                    <canvas id="deliveryChart" style="max-height: 16rem;"></canvas>
+                </div>
+            </div>
         </div>
     </div>
 </div>
