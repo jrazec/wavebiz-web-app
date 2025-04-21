@@ -81,7 +81,7 @@
 
         </div>
         <div class="d-flex justify-content-center">
-            <form method="POST" action="{{ route('logout') }}">
+            <form method="POST" action="{{ route('admin.logout') }}">
                 @csrf
                 <button type="submit" class="btn btn-outline-light mt-auto">Logout</button>
             </form>

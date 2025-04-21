@@ -23,37 +23,32 @@ class AdminSigninController extends Controller
             'fldPassword' => 'required',
         ]);
         
-        $credentials = $request->only('fldUserName', 'fldPassword');
-        if (Auth::guard('admin')->attempt($credentials)) {
-            
+        $credentials = [
+            'fldUserName' => $request->fldUserName,
+            'fldPassword' => $request->fldPassword, 
+        ];
+   
+        $admin = \App\Models\Admin::where('fldUserName', $request->fldUserName)->first();
+
+        if ($admin && $admin->fldPassword === $request->fldPassword)
+        {
+            Auth::guard('admin')->login($admin);
             return redirect()->intended($this->redirectTo);
         } else {
             return redirect()->back()->withErrors(['Invalid credentials']);
         }
+        
 
 
        
-    }
-    public function __construct()
-    {
-        $this->middleware('guest:admin')->except('logout');
-    }
-
-
-    protected function guard()
-    {
-        return Auth::guard('admin');
-    }
-
-    public function username()
-    {
-        return 'fldUserName';
     }
 
     public function logout(Request $request)
     {
         Auth::guard('admin')->logout();
-        return redirect('/admin/login');
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect('/admin/signin');
     }
 
 }
