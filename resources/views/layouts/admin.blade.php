@@ -44,11 +44,8 @@
             height: 100vh;
         }
         .active-menu {
-            background-color: #ffe15d;
-            color: black !important;
-            font-weight: bold;
-            padding-left: 0.5rem;
-            border-radius: 0.25rem;
+            background-color: #ffe15db7;
+            color: black;
         }
 
      
@@ -65,15 +62,17 @@
         
             <a href="{{ url('/admin/products') }}" class="menu {{ Request::is('products') ? 'active-menu' : '' }}">Products</a>
             <div class="submenu">
-                <a href="#">Categories</a>
+                <a href="{{ url('/admin/categories') }}">Categories</a>
                 <div class="submenu">
-                    <a href="#">Sub-Categories</a>
+                    <a href="{{ url('/admin/subcategories') }}">Sub-Categories</a>
                 </div>
             </div>
         
             <a href="{{ url('/admin/delivery') }}" class="menu {{ Request::is('deliveries') ? 'active-menu' : '' }}">Deliveries</a>
         
             <a href="{{ url('/admin/user') }}" class="menu {{ Request::is('members') ? 'active-menu' : '' }}">Members</a>
+
+            <a href="{{ url('/admin/roles') }}" class="menu {{ Request::is('roles') ? 'active-menu' : '' }}">Roles</a>
         
             <a href="{{ url('/admin/logs') }}" class="menu {{ Request::is('auditlog') ? 'active-menu' : '' }}">Audit Log</a>
         
@@ -94,6 +93,28 @@
     </div>
 
     @yield('scripts')
+    <script>
+        // Check current route
+        const currentPath = window.location.pathname;
+
+        // Check  if the current path matches any of the menu links
+        const menuLinks = document.querySelectorAll('.menu');
+        const submenuLinks = document.querySelectorAll('.submenu a');
+        menuLinks.forEach(link => {
+
+            // removing the other part of the path, will only use /admin/*, not inclyuding -not included-/admin
+            currentLink = link.getAttribute('href').split('/').slice(3,5).join('/');
+            console.log(currentLink,currentPath);
+            if (link.getAttribute('href').includes(currentPath) ) {
+                link.classList.add('active-menu');
+            }
+        });
+        submenuLinks.forEach(link => {
+            if (link.getAttribute('href').includes(currentPath)) {
+                link.classList.add('active-menu');
+            }
+        });
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

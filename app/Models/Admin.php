@@ -22,6 +22,7 @@ class Admin extends Authenticatable
     protected $keyType = 'int';
     protected $table = 'users';
     protected $connection = 'admin_db';
+    public $timestamps = false; // Set to true if you want to use created_at and updated_at timestamps
 
     protected $fillable = [
         'fldID',

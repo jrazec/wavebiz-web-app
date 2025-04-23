@@ -9,55 +9,25 @@
 <table class="table table-striped table-sm" id="auditLogsTable">
     <thead class="table-dark">
         <tr>
-            <th>fldID</th>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>User Role</th>
+            <th>#</th>
+            <th>UserID</th>
             <th>Action</th>
-            <th>Date</th>
+            <th>Description</th>
+            <th>Updated</th>
+            <th>Created</th>
         </tr>
     </thead>
-    <tbody></tbody>
+    <tbody>
+        @foreach ($logs as $log)
+        <tr>
+            <td>{{ $log->fldID }}</td>
+            <td>{{ $log->fldUserID ?? '' }}</td>
+            <td>{{ $log->fldAction }}</td>
+            <td>{{ $log->fldDescription ?? '' }}</td>
+            <td>{{ \Carbon\Carbon::parse($log->updated_at)->toDayDateTimeString() }}</td>
+            <td>{{ \Carbon\Carbon::parse($log->created_at)->toDayDateTimeString() }}</td>
+        </tr>
+        @endforeach
+    </tbody>
 </table>
-@endsection
-
-{{-- audit log scripts --}}
-@section('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        loadAuditLogs();
-    });
-
-    function loadAuditLogs() {
-        axios.get('/api/audit-logs') // expected: joined data with user info
-            .then(response => {
-                const tbody = document.querySelector('#auditLogsTable tbody');
-                tbody.innerHTML = '';
-
-                response.data.forEach(log => {
-                    let oldVals = tryParseJSON(log.fldOldValue);
-                    let newVals = tryParseJSON(log.fldNewValue);
-                    let changes = [];
-
-                    for (let key in newVals) {
-                        if (oldVals && oldVals[key] !== newVals[key]) {
-                            changes.push(`${key}: "${oldVals[key]}" → "${newVals[key]}"`);
-                        }
-                    }
-
-                    tbody.innerHTML += `
-                        <tr>
-                            <td>${log.fldID}</td>
-                            <td>${log.fldFirstName || ''}</td>
-                            <td>${log.fldLastName || ''}</td>
-                            <td>${log.role || ''}</td>
-                            <td>${log.fldAction}</td>
-
-                            <td>${new Date(log.created_at).toLocaleString()}</td>
-                        </tr>
-                    `;
-                });
-            });
-    }
-</script>
 @endsection

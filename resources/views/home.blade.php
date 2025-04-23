@@ -6,7 +6,27 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">{{ __('Product List') }}</div>
-
+                <!-- Slicer of Categories & Subcategories -->
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="category" class="form-label">Category</label>
+                        <select id="category" name="category" class="form-select">
+                            <option value="">Select Category</option>
+                            @foreach ($categories as $category)
+                                <option value="{{ $category->fldID }}">{{ $category->fldName }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="subcategory" class="form-label">Subcategory</label>
+                        <select id="subcategory" name="subcategory" class="form-select">
+                            <option value="">Select Subcategory</option>
+                            @foreach ($subcategories as $subcategory)
+                                <option value="{{ $subcategory->fldID }}">{{ $subcategory->subcategoryName }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
                 <div class="card-body">
                     @if (session('status'))
                         <div class="alert alert-success" role="alert">
@@ -38,3 +58,13 @@
     </div>
 </div>
 @endsection
+
+@section('scripts')
+<script>
+    var products = @json($products);
+    var categories = @json($categories);
+    var subcategories = @json($subcategories);
+    console.log(products);
+    console.log(categories);
+    console.log(subcategories);
+</script>

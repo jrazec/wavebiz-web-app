@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 
 class AdminProductController extends Controller
 {
@@ -21,9 +22,11 @@ class AdminProductController extends Controller
            ->join('categories', 'products.fldCategoryID', '=', 'categories.fldID')
            ->select('products.*', 'categories.fldName as fldCategoryName','categories.fldImage','categories.fldID as fldCategoryID')
            ->get();
-       $categories = Category::all();
+       $categories = Category::where('fldIsDeleted', 0)
+           ->select('*')
+           ->get();
        return view('admin.products', compact('products', 'deletedProducts', 'categories'));
-   }
+    }
 
    // Logic for creation new product
    public function create(Request $request)
@@ -61,6 +64,14 @@ class AdminProductController extends Controller
             'fldIsVisible' => $request->fldIsVisible,
         ]);
         // Redirect to the products page with a success message
+
+        // Audit log creation
+        AuditLog::create([
+            'fldUserID' => 1,
+            'fldAction' => 'Create Product',
+            'fldDescription' => 'Created product: ' . $request->fldName,
+            'created_at' => now(),
+        ]);
         return redirect()->route('admin.products')->with('success', 'Product created successfully.');
 
 
@@ -106,6 +117,14 @@ class AdminProductController extends Controller
             'fldIsSoldOut' => $request->edit_fldIsSoldOut,
             'fldIsVisible' => $request->edit_fldIsVisible,
         ]);
+
+        // Audit log creation
+        AuditLog::create([
+            'fldUserID' => 1,
+            'fldAction' => 'Update Product',
+            'fldDescription' => 'Updated product: ' . $request->edit_fldName,
+            'updated_at' => now(),
+        ]);
         // Redirect to the products page with a success message
         return redirect()->route('admin.products')->with('success', 'Product updated successfully.');
         
@@ -123,6 +142,13 @@ class AdminProductController extends Controller
           $product->update([
                 'fldIsDeleted' => 1,
           ]);
+
+            // Audit log creation
+            AuditLog::create([
+                    'fldUserID' => 1,
+                    'fldAction' => 'Delete Product',
+                    'fldDescription' => 'Soft Deleted product: ' . $product->delete_fldID,
+            ]);
           // Redirect to the products page with a success message
           return redirect()->route('admin.products')->with('success', 'Product deleted successfully.');
     }
