@@ -16,7 +16,8 @@ class AdminAuditLogsController extends Controller
         // Fetch audit logs from the database
        // $auditLogs = AuditLog::all();
         $logs = AuditLog::orderBy('created_at', 'desc')
-            ->select('*')
+            ->select('audit_logs.*', 'users.fldUserName')
+            ->join('users', 'audit_logs.fldUserID', '=', 'users.fldID')
             ->get();
                     // Return the view with the audit logs
         return view('admin.auditlog',compact('logs'));

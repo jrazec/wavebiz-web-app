@@ -9,8 +9,8 @@
 <table class="table table-striped table-sm" id="auditLogsTable">
     <thead class="table-dark">
         <tr>
-            <th>#</th>
-            <th>UserID</th>
+            <th>User ID</th>
+            <th>Username</th>
             <th>Action</th>
             <th>Description</th>
             <th>Updated</th>
@@ -20,8 +20,8 @@
     <tbody>
         @foreach ($logs as $log)
         <tr>
-            <td>{{ $log->fldID }}</td>
-            <td>{{ $log->fldUserID ?? '' }}</td>
+            <td>{{ $log->fldUserID }}</td>
+            <td>{{ $log->fldUserName ?? '' }}</td>
             <td>{{ $log->fldAction }}</td>
             <td>{{ $log->fldDescription ?? '' }}</td>
             <td>{{ \Carbon\Carbon::parse($log->updated_at)->toDayDateTimeString() }}</td>

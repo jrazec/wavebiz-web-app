@@ -41,6 +41,7 @@ class Product extends Model
         'fldIsSoldOut',
         'fldIsVisible',
         'fldIsDeleted',
+        'fldImage'
     ];
 
 

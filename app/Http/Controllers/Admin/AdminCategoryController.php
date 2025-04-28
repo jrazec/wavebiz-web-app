@@ -8,6 +8,8 @@ use App\Models\Category;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use App\Models\AuditLog;
+use Illuminate\Support\Facades\Auth;
+
 
 class AdminCategoryController extends Controller
 {
@@ -20,20 +22,22 @@ class AdminCategoryController extends Controller
                 DB::raw('(
                     SELECT COUNT(*) 
                     FROM categories c 
-                    WHERE c.subCategoryId = cs.fldID AND c.fldName IS NOT NULL
-                ) as SubcategoryCount')
+                    WHERE c.subCategoryId = cs.fldID AND c.fldName IS NOT NULL AND fldIsDeleted = 0
+                ) as SubcategoryCount'),
             )
             ->whereNull('cs.subCategoryId')
             ->where('cs.fldIsDeleted', 0)
+            ->where('cs.fldID', '!=', 0)
             ->get();
         // select cs.fldID, c.fldName from categories cs join categories c on cs.fldID = c.subCategoryId;
         $subcategories = Category::from('categories as cs')
             ->select(
                 'cs.fldID',
                 'c.fldName',
+                'c.fldID as subcategoryId',
             )
             ->join('categories as c', 'cs.fldID', '=', 'c.subCategoryId')
-            ->where('cs.fldIsDeleted', 0)
+            ->where('c.fldIsDeleted', 0)
             ->get();
 
 
@@ -56,10 +60,10 @@ class AdminCategoryController extends Controller
                 'fldDescription' => $request->fldDescription,
             ]);
 
-
+            $admin = Auth::guard('admin')->user();
             // Audit log creation
             AuditLog::create([
-                'fldUserID' => 1,
+                'fldUserID' => $admin->fldID,
                 'fldAction' => 'Create Category',
                 'fldDescription' => 'Created category: ' . $request->fldName,
                 'created_at' => now(),
@@ -79,8 +83,8 @@ class AdminCategoryController extends Controller
         // update the product by its id set to the request
         $category = Product::find($request->edit_fldID);
         // Check if the product exists
-        if (!$product) {
-            return redirect()->route('admin.products')->with('error', 'Product not found.');
+        if (!$category) {
+            return redirect()->route('admin$categorys')->with('error', 'Category not found.');
         }
 
         $product->update([
@@ -112,17 +116,18 @@ class AdminCategoryController extends Controller
             'fldIsCompanyOwned' => $request->edit_fldIsCompanyOwned,
             'fldIsSoldOut' => $request->edit_fldIsSoldOut,
             'fldIsVisible' => $request->edit_fldIsVisible,
+            'fldImage' => $request->edit_fldImage,        
         ]);
-
-            // Audit log creation
-            AuditLog::create([
-                'fldUserID' => 1,
-                'fldAction' => 'Create Category',
-                'fldDescription' => 'Edited category: ' . $request->fldName,
-                'updated_at' => now(),
-            ]);
+        $admin = Auth::guard('admin')->user();
+        // Audit log creation
+        AuditLog::create([
+            'fldUserID' => $admin->fldID,
+            'fldAction' => 'Create Category',
+            'fldDescription' => 'Edited category: ' . $request->fldName,
+            'updated_at' => now(),
+        ]);
         // Redirect to the products page with a success message
-        return redirect()->route('admin.products')->with('success', 'Product updated successfully.');
+        return redirect()->route('admin.categories')->with('success', 'Category updated successfully.');
         
     }
 

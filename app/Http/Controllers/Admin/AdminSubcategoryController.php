@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Support\Facades\DB;
 use App\Models\AuditLog;
+use Illuminate\Support\Facades\Auth;
 
 class AdminSubcategoryController extends Controller
 {
@@ -31,6 +32,7 @@ class AdminSubcategoryController extends Controller
                 'c.fldName as subcategoryName',
                 'cs.fldName as categoryName',
                 'c.fldDescription',
+                'cs.fldID as categoryId',
             )
             ->join('categories as c', 'cs.fldID', '=', 'c.subCategoryId')
             ->where('c.fldIsDeleted', 0)
@@ -41,6 +43,7 @@ class AdminSubcategoryController extends Controller
     public function create(Request $request)
     {
         try {
+            $admin = Auth::guard('admin')->user();
             // insert the data into the database directly using Produt::create()
             $category = Category::create([
                 'fldName' => $request->fldName,
@@ -51,7 +54,7 @@ class AdminSubcategoryController extends Controller
 
             // Audit log creation
             AuditLog::create([
-                'fldUserID' => 1,
+                'fldUserID' => $admin->fldID,
                 'fldAction' => 'Create Product',
                 'fldDescription' => 'Created product: ' . $request->fldName,
                 'created_at' => now(),
@@ -62,17 +65,46 @@ class AdminSubcategoryController extends Controller
             return redirect()->route('admin.subcategories')->with('error', 'Failed to create category.');
         }
     }
+    public function  edit(Request $request)
+    {
+        try {
+            $id = $request->edit_fldID;
+            $subcategories = Category::find($id);
+            $admin = Auth::guard('admin')->user();
+            $subcategories->update([
+                'fldName' => $request->edit_fldName,
+                'fldDescription' => $request->edit_fldDescription,
+                'subCategoryId' => $request->edit_fldCategoryID,   
+            ]);
+            if(!$subcategories){
+               return redirect()->route('admin.subcategories')->with('error', 'Category not found.');
+            }
+            $subcategories->save();
+            AuditLog::create([
+                'fldUserID' => $admin->fldID,
+                'fldAction' => 'Edit Product',
+                'fldDescription' => 'Edited product: ' . $request->edit_fldName,
+                'created_at' => now(),
+            ]);
+            return redirect()->route('admin.subcategories')->with('success', 'Category updated successfully.');
+
+        } catch (\Exception $e) {
+            //throw $th;
+            return redirect()->route('admin.subcategories')->with('error', 'Failed to update category.');
+        }
+    }
     public function delete(Request $request)
     {
         $id = $request->input('delete_fldID');
         // Soft delete the category
         $category = Category::find($id);
+        $admin = Auth::guard('admin')->user();
         if ($category) {
             $category->fldIsDeleted = 1;
             $category->save();
             // Audit log creation
             AuditLog::create([
-                'fldUserID' => 1,
+                'fldUserID' => $admin->fldID,
                 'fldAction' => 'Deleted Product',
                 'fldDescription' => 'Soft Deleted product: ' . $request->delete_fldID,
                 'created_at' => now(),

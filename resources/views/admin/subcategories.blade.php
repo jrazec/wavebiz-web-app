@@ -45,7 +45,7 @@
                             <td>{{ $subcategory['categoryName'] }}</td>
                             <td>
                                 <button class="btn btn-info btn-sm view-morecontent-btn" data-bs-toggle="modal" data-bs-target="#viewMoreSubcategoryModal" data-id="{{ $subcategory['fldID'] }}">View More</button>
-                                <button class="btn btn-warning btn-sm edit-btn" data-id="{{ $subcategory['fldID'] }}">Edit</button>
+                                <button class="btn btn-warning btn-sm edit-btn" data-id="{{ $subcategory['fldID'] }}" data-bs-toggle="modal" data-bs-target="#editSubcategoryModal">Edit</button>
                                 <button class="btn btn-danger btn-sm delete-btn" data-id="{{ $subcategory['fldID'] }}" data-bs-toggle="modal" data-bs-target="#deleteSubcategoryModal">Delete</button>
                             </td>
                         </tr>
@@ -112,21 +112,40 @@
     </div>
 </div>
 
-<!-- Edit Product Modal -->
-<div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductLabel" aria-hidden="true">
+<!-- Edit Subcategory Modal -->
+<div class="modal fade" id="editSubcategoryModal" tabindex="-1" aria-labelledby="editSubcategoryLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content">
-            <form id="editProductForm" action="{{route('admin.subcategories.edit')}}" method="POST">
+            <form id="editSubcategoryForm" action="{{route('admin.subcategories.edit')}}" method="POST">
                 @csrf
                 <div class="modal-header">
-                    <h5 class="modal-title" id="editProductLabel">Edit Product</h5>
+                    <h5 class="modal-title" id="editSubcategoryLabel">Edit Subcategory</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="row g-3"></div>
+                    <div class="row g-3">
+                        <input type="hidden" name="edit_fldID" id="edit_fldID">
+                        <div class="col-md-6">
+                            <label for="edit_fldName" class="form-label">Sub-Category Name</label>
+                            <input type="text" class="form-control" id="edit_fldName" name="edit_fldName" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="edit_fldDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="edit_fldDescription" name="edit_fldDescription" rows="3"></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="edit_categoryID" class="form-label">Category</label>
+                            <select class="form-select" id="edit_categoryID" name="edit_fldCategoryID" required>
+                                <option value="">Select Category</option>
+                                @foreach($categories as $category)
+                                    <option value="{{ $category['fldID'] }}">{{ $category['fldName'] }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Save Product</button>
+                    <button type="submit" class="btn btn-primary">Save Subcategory</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </form>
@@ -181,16 +200,15 @@
 
 @section('scripts')
 <script>
-    var categories = @json($categories);
-    var subcategories = @json($subcategories);
+    let categories = @json($categories);
+    let subcategories = @json($subcategories);
     console.log(subcategories);
     console.log(categories);
 
     const categoryFilter = document.getElementById('categoryFilter');
         categoryFilter.addEventListener('change', function() {
             const selectedCategoryName = this.options[this.selectedIndex].text;
-            const rows = document.querySelectorAll('.subcategory-row');
-            
+            const rows = document.querySelectorAll('.subcategory-row');            
             rows.forEach(row => {
                 const rowCategoryName = row.getAttribute('data-subcategory-name');
                 if (selectedCategoryName === "All Categories" || rowCategoryName === selectedCategoryName) {
@@ -201,11 +219,6 @@
             });
         });
     
-</script>
-
-<script>
-    var categories = @json($categories);
-    var subcategories = @json($subcategories);
     console.log(categories);
     console.log(subcategories);
     document.addEventListener('DOMContentLoaded', function () {
@@ -224,6 +237,7 @@
                         <p>Description: ${subcategory.fldDescription}</p>
                         <p>Category: ${subcategory.categoryName}</p>
                     `;
+                    console.log(subcategory);
                 });
             });
         @if(session('success') || session('error') || session('info'))
@@ -234,9 +248,6 @@
             }, 3000);
         @endif
     });
-</script>
-
-<script>
     // Delete SubCategory Button Click Handler
     const deleteSubcategoryModal = document.getElementById('deleteSubcategoryModal');
     const deleteSubcategoryForm = document.getElementById('deleteSubcategoryForm');
@@ -250,5 +261,22 @@
         });
     });
 
+    // Edit Subcategory Button Click Handler
+    document.addEventListener('DOMContentLoaded', function () { 
+        const editBtns = document.querySelectorAll('.edit-btn');
+        editBtns.forEach(button => {
+            button.addEventListener('click', function() {
+                const subcategoryId = this.getAttribute('data-id');
+                const subcategory = subcategories.find(sub => sub.fldID == subcategoryId);
+                const editSubcategoryForm = document.getElementById('editSubcategoryForm');
+                editSubcategoryForm.querySelector('#edit_fldID').value = subcategory.fldID;
+                editSubcategoryForm.querySelector('#edit_fldName').value = subcategory.subcategoryName;
+                editSubcategoryForm.querySelector('#edit_fldDescription').value = subcategory.fldDescription;
+                editSubcategoryForm.querySelector('#edit_categoryID').value = `${subcategory.categoryId}`;
+            });
+        });
+
+
+    });
 </script>
 @endsection

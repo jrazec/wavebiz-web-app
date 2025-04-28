@@ -7,7 +7,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Admin;
-
+use Illuminate\Support\Facades\Hash;
 
 class AdminSigninController extends Controller
 {
@@ -28,9 +28,8 @@ class AdminSigninController extends Controller
             'fldPassword' => $request->fldPassword, 
         ];
    
-        $admin = \App\Models\Admin::where('fldUserName', $request->fldUserName)->first();
-
-        if ($admin && $admin->fldPassword === $request->fldPassword)
+        $admin = Admin::where('fldUserName', $request->fldUserName)->first();
+        if ($admin && Hash::check($request->fldPassword, $admin->fldPassword))
         {
             Auth::guard('admin')->login($admin);
             return redirect()->intended($this->redirectTo);
