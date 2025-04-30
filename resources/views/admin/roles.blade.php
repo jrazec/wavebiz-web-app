@@ -10,9 +10,9 @@
     <!-- Filter Section -->
     <div class="d-flex justify-content-around align-items-center gap-3 mb-4">
         <div>
-            <button class="btn btn-info" id="assignRole">Assign Role</button>
-            <button class="btn btn-info" id="managePermission" data-bs-toggle="modal" data-bs-target="#managePermissionsModal">Manage Permissions</button>
-            <button class="btn btn-info" id="manageModules" data-bs-toggle="modal" data-bs-target="#manageModulesModal">Manage Modules</button>
+            
+            <button class="btn btn-info" id="managePermission" data-bs-toggle="modal" data-bs-target="#addRoleModal">Add Role</button>
+            <button class="btn btn-info" id="manageModules" data-bs-toggle="modal" data-bs-target="#manageRolePermissionsModal">Manage Role Permissions</button>
         </div>
 
         <div>
@@ -110,10 +110,11 @@
                                         <h5 class="modal-title" id="editModalLabel{{ $user->fldID }}">Edit User</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
-                                    <form  method="POST">
+                                    <form method="POST" action="{{ route('admin.roles.update') }}" name="editUserForm{{ $user->fldID }}">
                                         @csrf
-                                        @method('PUT')
+                                        @method('POST')
                                         <div class="modal-body">
+                                            <input type="hidden" name="fldUserID" value="{{ $user->fldID }}">
                                             <div class="mb-3">
                                                 <label for="fldUserName" class="form-label">Username</label>
                                                 <input type="text" class="form-control" id="fldUserName" name="fldUserName" value="{{ $user->fldUserName }}" required>
@@ -133,25 +134,59 @@
                                             <div class="mb-3">
                                                 <label for="fldRoleName" class="form-label">Role</label>
                                                 <select class="form-control" id="fldRoleName" name="fldRoleName" required>
-                                                    <option value="">Select Role</option>
-                                                    <option value="Admin" {{ $user->fldRoleName == 'Admin' ? 'selected' : '' }}>Admin</option>
-                                                    <option value="User" {{ $user->fldRoleName == 'User' ? 'selected' : '' }}>User</option>
-                                                    <option value="Manager" {{ $user->fldRoleName == 'Manager' ? 'selected' : '' }}>Manager</option>
+                                                   
+                                                    @php 
+                                                    $roles = DB::connection('admin_db')
+                                                        ->table('Permissions')
+                                                        ->select('fldRoleName')
+                                                        ->distinct()
+                                                        ->get();
+                                                    @endphp
+                                                    @foreach ($roles as $role)
+                                                        // if $user->fldRoleName == $role->fldRoleName then selected
+                                                        @if ($user->fldRoleName == $role->fldRoleName)
+                                                            <option value="{{ $role->fldRoleName }}" selected>{{ $role->fldRoleName }}</option>
+                                                        @else
+                                                            <option value="{{ $role->fldRoleName }}">{{ $role->fldRoleName }}</option>
+                                                        @endif
+                                                    @endforeach
                                                 </select>
                                             </div>
+                                            <!-- Create isReset Checkbox with a value of false in default and becomes true when clciked -->
+                                             <div class="mb-3">
+                                              
+                                                <input type="checkbox" class="btn-check" id="isReset{{ $user->fldID }}" name="isReset" value="false" autocomplete="off">
+                                                <label class="btn btn-outline-danger" for="isReset{{ $user->fldID }}">Toggle to Reset Password</label>
+                                                <script>
+                                                    document.getElementById('isReset{{ $user->fldID }}').addEventListener('change', function() {
+                                                        this.value = this.checked ? 'true' : 'false';
+                                                    });
+                                                </script>
+                                               
+                                            </div>
+
                                         </div>  
+                                        <div class="modal-footer">
+                                            <button type="submit" class="btn btn-primary" name="btnSavePermission{{$user->fldID}}">Save Changes</button>
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
             @endforeach
         </tbody>
     </table>
 
-    <!-- Manage Permissions Modal -->
-    <div class="modal fade" id="managePermissionsModal" tabindex="-1" aria-labelledby="managePermissionsModalLabel" aria-hidden="true">
+    <!-- Add Role Modal -->
+    <div class="modal fade" id="addRoleModal" tabindex="-1" aria-labelledby="addRoleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
-            <form method="POST" action="">
+            <form method="POST" action="{{ route('admin.roles.save') }}">
                 @csrf
+                @method('POST')
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="managePermissionsModalLabel">Manage Permissions</h5>
+                        <h5 class="modal-title" id="addRoleModalLabel">Add Role</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -160,24 +195,39 @@
                             <input type="text" class="form-control" name="fldRoleName" id="fldRoleName" placeholder="e.g. Admin" required>
                         </div>
                         <div class="mb-3">
-                            <label for="fldModuleID" class="form-label">Module</label>
-                            <select class="form-control" name="fldModuleID" id="fldModuleID" required>
-                                @foreach ($modules as $module)
-                                    <option value="{{ $module->fldID }}">{{ $module->fldTableName }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="form-check mb-2">
-                            <input type="checkbox" class="form-check-input" name="fldCanAdd" id="fldCanAdd">
-                            <label class="form-check-label" for="fldCanAdd">Can Add</label>
-                        </div>
-                        <div class="form-check mb-2">
-                            <input type="checkbox" class="form-check-input" name="fldCanEdit" id="fldCanEdit">
-                            <label class="form-check-label" for="fldCanEdit">Can Edit</label>
-                        </div>
-                        <div class="form-check mb-2">
-                            <input type="checkbox" class="form-check-input" name="fldCanDelete" id="fldCanDelete">
-                            <label class="form-check-label" for="fldCanDelete">Can Delete</label>
+                            <label class="form-label">Permissions by Module</label>
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Module</th>
+                                            <th class="text-center">Can View</th>
+                                            <th class="text-center">Can Add</th>
+                                            <th class="text-center">Can Edit</th>
+                                            <th class="text-center">Can Delete</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($modules as $module)
+                                            <tr>
+                                                <td>{{ $module->fldTableName }}</td>
+                                                <td class="text-center">
+                                                    <input type="checkbox" class="form-check-input" name="add_permissions[{{ $module->fldID }}][view]" id="view-{{ $module->fldID }}">
+                                                </td>
+                                                <td class="text-center">
+                                                    <input type="checkbox" class="form-check-input" name="add_permissions[{{ $module->fldID }}][add]" id="add-{{ $module->fldID }}">
+                                                </td>
+                                                <td class="text-center">
+                                                    <input type="checkbox" class="form-check-input" name="add_permissions[{{ $module->fldID }}][edit]" id="edit-{{ $module->fldID }}">
+                                                </td>
+                                                <td class="text-center">
+                                                    <input type="checkbox" class="form-check-input" name="add_permissions[{{ $module->fldID }}][delete]" id="delete-{{ $module->fldID }}">
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -189,24 +239,109 @@
         </div>
     </div>
 
-    <!-- Manage Modules Modal -->
-    <div class="modal fade" id="manageModulesModal" tabindex="-1" aria-labelledby="manageModulesModalLabel" aria-hidden="true">
+    <!-- Manage Role Permissions Modal -->
+    <div class="modal fade" id="manageRolePermissionsModal" tabindex="-1" aria-labelledby="manageRolePermissionsModalLabel" aria-hidden="true">
         <div class="modal-dialog">
-            <form method="POST" action="">
+            <form method="POST" action="{{ route('admin.roles.manage') }}">
                 @csrf
+                @method('POST')
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="manageModulesModalLabel">Manage Modules</h5>
+                        <h5 class="modal-title" id="manageRolePermissionsModalLabel">Manage Role Permissions</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label for="fldTableName" class="form-label">Module Table Name</label>
-                            <input type="text" class="form-control" name="fldTableName" id="fldTableName" placeholder="e.g. Products" required>
+                            <label for="fldRoleName" class="form-label">Select Role</label>
+                            <select class="form-control" name="fldRoleName" id="fldRoleNameSelector" required>
+                                <option value="">Select Role</option>
+                                @php
+                                    $roles = DB::connection('admin_db')
+                                    ->table('Permissions')
+                                    ->select('fldRoleName')
+                                    ->distinct()
+                                    ->get();
+                                    // Getting these: ,fldModuleID,fldCanView,fldCanAdd,fldCanEdit,fldCanDelete
+                                    $permissions = DB::connection('admin_db')
+                                    ->table('Permissions')
+                                    ->select('fldID','fldRoleName','fldModuleID','fldCanView','fldCanAdd','fldCanEdit','fldCanDelete')
+                                    ->get();
+                                @endphp
+                                @foreach ($roles as $role)
+                                    <option value="{{ $role->fldRoleName }}">{{ $role->fldRoleName }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Permissions by Module</label>
+                            <button type="button" class="btn btn-secondary" id="editRoleBtn">Edit</button>
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Module</th>
+                                            <th class="text-center">Can View</th>
+                                            <th class="text-center">Can Add</th>
+                                            <th class="text-center">Can Edit</th>
+                                            <th class="text-center">Can Delete</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($modules as $module)
+                                            <tr>
+                                                <td>{{ $module->fldTableName }}</td>
+                                                <td class="text-center">
+                                                    <input type="checkbox" class="form-check-input-Manage" name="permissions[{{ $module->fldID }}][view]" id="view-{{ $module->fldID }}">
+                                                </td>
+                                                <td class="text-center">
+                                                    <input type="checkbox" class="form-check-input-Manage" name="permissions[{{ $module->fldID }}][add]" id="add-{{ $module->fldID }}">
+                                                </td>
+                                                <td class="text-center">
+                                                    <input type="checkbox" class="form-check-input-Manage" name="permissions[{{ $module->fldID }}][edit]" id="edit-{{ $module->fldID }}">
+                                                </td>
+                                                <td class="text-center">
+                                                    <input type="checkbox" class="form-check-input-Manage" name="permissions[{{ $module->fldID }}][delete]" id="delete-{{ $module->fldID }}">
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                                <p class="text-muted">Note: Check the permissions you want to assign to the selected role.</p>
+                            </div>
+                        </div>
+                    </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Save Permissions</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+            </div>
+        </div>
+    </div>
+                                        
+
+    <!-- Assign Role Modal -->
+    <div class="modal fade" id="assignRoleModal" tabindex="-1" aria-labelledby="assignRoleModalLabel{{ $user->fldID }}" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="POST">
+                @csrf
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="assignRoleModalLabel">Assign Role</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="user_id" id="assignRoleUserId">
+                        <div class="mb-3">
+                            <label for="assignRoleName" class="form-label">Select Role</label>
+                            <select class="form-control" name="role_name" id="assignRoleName" required>
+                                <option value="">Select Role</option>
+                                
+                            </select>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary">Save Module</button>
+                        <button type="submit" class="btn btn-primary">Assign Role</button>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     </div>
                 </div>
@@ -214,6 +349,79 @@
         </div>
     </div>
 
+    <!-- Edit Role Modal -->
+    <div class="modal fade" id="editRoleModal{{ $user->fldID }}" tabindex="-1" aria-labelledby="editRoleModalLabel{{ $user->fldID }}" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="POST" action="{{ route('admin.role.delete') }}">
+                @csrf
+                @method('POST')
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editRoleModalLabel">Edit Role</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="user_id" id="editRoleUserId">
+                        <div class="mb-3">
+                            <label for="editRoleName" class="form-label">Select Role</label>
+                            <select class="form-control" name="role_name" id="editRoleName" required>
+                                <option value="">Select Role</option>
+                                @php
+                                $roles = DB::connection('admin_db')
+                                    ->table('Permissions')
+                                    ->select('fldRoleName')
+                                    ->distinct()
+                                    ->get();
+                                @endphp
+                                @foreach ($roles as $role)
+                                    <option value="{{ $role->fldRoleName }}">{{ $role->fldRoleName }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Current Permissions</label>
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Module</th>
+                                            <th class="text-center">Can View</th>
+                                            <th class="text-center">Can Add</th>
+                                            <th class="text-center">Can Edit</th>
+                                            <th class="text-center">Can Delete</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($modules as $module)
+                                            <tr>
+                                                <td>{{ $module->fldTableName }}</td>
+                                                <td class="text-center">
+                                                    <input type="checkbox" class="form-check-input" name="permissions[{{ $module->fldID }}][view]" id="edit-view-{{ $module->fldID }}">
+                                                </td>
+                                                <td class="text-center">
+                                                    <input type="checkbox" class="form-check-input" name="permissions[{{ $module->fldID }}][add]" id="edit-add-{{ $module->fldID }}">
+                                                </td>
+                                                <td class="text-center">
+                                                    <input type="checkbox" class="form-check-input" name="permissions[{{ $module->fldID }}][edit]" id="edit-edit-{{ $module->fldID }}">
+                                                </td>
+                                                <td class="text-center">
+                                                    <input type="checkbox" class="form-check-input" name="permissions[{{ $module->fldID }}][delete]" id="edit-delete-{{ $module->fldID }}">
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 @endsection
 
@@ -221,69 +429,80 @@
 <script>
     var users = @json($users);
     console.log(users)
-    const assignRoleButton = document.getElementById('assignRole');
-    let assignRoleButtonToggle = false;
+    var roles = @json($roles);
+    console.log(roles)
+    console.log(@json($users))
+   
     const managePermissionButton = document.getElementById('managePermission');
     const manageModulesButton = document.getElementById('manageModules');
-    assignRoleButton.addEventListener('click', () => {
-    assignRoleButtonToggle = !assignRoleButtonToggle;
+  
+   const selectFldRoleName = document.getElementById('fldRoleNameSelector');
+   selectFldRoleName.addEventListener('change', function() {
+        const selectedRole = this.value;
+        const cb = document.querySelectorAll('input[type="checkbox"]');
+        const checkboxes = [];
+        cb.forEach(checkbox => {
+            if (checkbox.classList.contains('form-check-input-Manage')) {
+                checkboxes.push(checkbox);
+            }
+        });
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = false; // Uncheck all checkboxes
+        });
+        const permissions = @json($permissions);
+        console.log(permissions);
+        const selectedPermissions = permissions.filter(permission => permission.fldRoleName === selectedRole);
+        selectedPermissions.forEach(permission => {
+            checkboxes.forEach(checkbox => {
+                if (checkbox.name === `permissions[${permission.fldModuleID}][view]`) {
+                    checkbox.checked = permission.fldCanView === 1;
+                }
+                if (checkbox.name === `permissions[${permission.fldModuleID}][add]`) {
+                    checkbox.checked = permission.fldCanAdd === 1;
+                    
+                }
+                if (checkbox.name === `permissions[${permission.fldModuleID}][edit]`) {
+                    checkbox.checked = permission.fldCanEdit === 1;
+                    
+                }
+                if (checkbox.name === `permissions[${permission.fldModuleID}][delete]`) {
+                    checkbox.checked = permission.fldCanDelete === 1;
+                    
+                }
+                checkbox.disabled = true;
+            });
+        });
 
-    // Toggle button appearance
-    if (assignRoleButtonToggle) {
-        assignRoleButton.classList.add('btn-success');
-        assignRoleButton.classList.remove('btn-info');
-        assignRoleButton.innerText = 'Cancel Assign Role';
-    } else {
-        assignRoleButton.classList.remove('btn-success');
-        assignRoleButton.classList.add('btn-info');
-        assignRoleButton.innerText = 'Assign Role';
-    }
-
-    // Handle each role-name row
-    const roleNameRows = document.querySelectorAll('.role-name');
-    roleNameRows.forEach(row => {
-        // Clear existing buttons
-        const existingButton = row.querySelector('button');
-        if (existingButton) {
-            existingButton.remove();
-        }
-
-        const userId = row.id.split('-')[2];
-        const roleText = row.className.split(' ')[1];
-
-        if (!assignRoleButtonToggle) {
-            // If toggle is OFF, restore original class name if needed
-            const className = row.className.split(' ')[1];
-            row.innerText = className;
-            return;
-        }
-
-        // If toggle is ON, create appropriate button
-        const button = document.createElement('button');
-        button.classList.add('btn');
-        button.setAttribute('data-user-id', userId);
-
-        if (!roleText || roleText === "") {
-            // If no role assigned
-            button.innerText = 'Assign Role';
-            button.classList.add('btn-primary');
-            button.setAttribute('data-bs-toggle', 'modal');
-            button.setAttribute('data-bs-target', '#assignRoleModal');
-            button.setAttribute('data-role-name', '');
-        } else {
-            // If role exists
-            button.innerText = 'Edit Role';
-            button.classList.add('btn-warning');
-            button.setAttribute('data-bs-toggle', 'modal');
-            button.setAttribute('data-bs-target', '#editRoleModal');
-            button.setAttribute('data-role-name', roleText);
-        }
-
-        // Clear text content and append button
-        row.innerText = '';
-        row.appendChild(button);
     });
-});
+
+    const editRoleBtn = document.getElementById('editRoleBtn');
+    let editRoleToggle = false;
+
+    editRoleBtn.addEventListener('click', () => {
+        editRoleToggle = !editRoleToggle;
+        console.log("Edit Role Button Clicked, Toggle State:", editRoleToggle);
+
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(checkbox => {
+            if (checkbox.classList.contains('form-check-input-Manage')) {
+                checkbox.disabled = !editRoleToggle; // Toggle the disabled state
+            }
+        });
+
+        // Update button appearance based on toggle state
+        if (editRoleToggle) {
+            editRoleBtn.classList.add('btn-success');
+            editRoleBtn.classList.remove('btn-secondary');
+            editRoleBtn.innerText = 'Finish Editing';
+        } else {
+            editRoleBtn.classList.remove('btn-success');
+            editRoleBtn.classList.add('btn-secondary');
+            editRoleBtn.innerText = 'Edit';
+        }
+    });
+
+
+
 
 </script>
 @endsection

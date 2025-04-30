@@ -27,4 +27,29 @@ return new class extends Migration
             $table->dropForeign('user_permissions_ibfk_2');
         });
     }
+
+    /*
+    CREATE TABLE Deliveries (
+    fldID BIGINT AUTO_INCREMENT PRIMARY KEY,
+    fldOrderID BIGINT,
+    fldDeliveryAddress VARCHAR(500) NOT NULL,
+    fldDeliveryStatus VARCHAR(100) DEFAULT 'Pending',
+    fldDeliveryDate DATETIME NULL,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+    FOREIGN KEY (fldOrderID) REFERENCES Orders(fldID)
+);
+
+CREATE TABLE Orders (
+    fldID BIGINT AUTO_INCREMENT PRIMARY KEY,
+    fldMemberID BIGINT,
+    fldOrderDate DATETIME NOT NULL,
+    fldTotalAmount DECIMAL(10,2) NOT NULL,
+    fldPaymentStatus TINYINT DEFAULT 0,
+    fldOrderStatus TINYINT DEFAULT 0,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+    FOREIGN KEY (fldMemberID) REFERENCES Members(fldID)
+);
+    */
 };

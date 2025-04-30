@@ -1,6 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+use App\Models\Admin;
 
 Route::get('/', function () {
     return view('auth.login');
@@ -46,7 +50,10 @@ Route::prefix('admin')->group(function () {
 
         // Roles
         Route::get('/roles', [App\Http\Controllers\Admin\AdminRoleController::class, 'index'])->name('admin.roles');
-
+        Route::post('/roles', [App\Http\Controllers\Admin\AdminRoleController::class, 'save'])->name('admin.roles.save');
+        Route::post('/roles/edit', [App\Http\Controllers\Admin\AdminRoleController::class, 'edit'])->name('admin.roles.update');
+        Route::post('/roles/delete/', [App\Http\Controllers\Admin\AdminRoleController::class, 'delete'])->name('admin.role.delete');
+        Route::post('/roles/manage', [App\Http\Controllers\Admin\AdminRoleController::class, 'manage'])->name('admin.roles.manage');
 
         Route::get('/settings', [App\Http\Controllers\Admin\AdminSettingsController::class, 'settings'])->name('admin.profile');
         // Admin Delivery
@@ -72,9 +79,7 @@ Route::prefix('admin')->group(function () {
     // Route::get('/user/delete/{id}', [App\Http\Controllers\Admin\AdminUserController::class, 'deleteUser'])->name('admin.user.delete');
     // Admin Products
   
-    
-    
-    // Admin Settings
-  
+
+
     
 });

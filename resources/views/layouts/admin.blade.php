@@ -185,12 +185,12 @@
             <a href="{{ url('/admin/dashboard') }}" class="menu {{ Request::is('dashboard') ? 'active-menu' : '' }}">Home</a>
         
             <a href="{{ url('/admin/products') }}" class="menu {{ Request::is('products') ? 'active-menu' : '' }}">Products</a>
+            
+            <a href="{{ url('/admin/categories') }}" class="menu">Categories</a>
             <div class="submenu">
-                <a href="{{ url('/admin/categories') }}">Categories</a>
-                <div class="submenu">
-                    <a href="{{ url('/admin/subcategories') }}">Sub-Categories</a>
-                </div>
+                <a href="{{ url('/admin/subcategories') }}">Sub-Categories</a>
             </div>
+
         
             <a href="{{ url('/admin/delivery') }}" class="menu {{ Request::is('deliveries') ? 'active-menu' : '' }}">Deliveries</a>
         

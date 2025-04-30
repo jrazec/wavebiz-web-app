@@ -51,6 +51,7 @@ return new class extends Migration
             $table->boolean('fldIsDeleted')->default(false);
             $table->dateTime('fldDateDeleted')->useCurrent();
             $table->integer('fldDeletedBy')->default(0);
+            $table->string('fldImage', 400)->nullable();
         });
     }
 
